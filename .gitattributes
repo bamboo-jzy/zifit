@@ -1,0 +1,29 @@
+# 统一换行符策略
+#
+# 本机 core.autocrlf=true（PortableGit 系统级配置），会把工作区文件
+# 在 checkout 时转成 CRLF —— 其中 gradlew 是 shell 脚本，一旦变成 CRLF，
+# Git Bash 下执行 ./gradlew 会报 "bad interpreter" 而失败。
+# 故用 .gitattributes 显式接管，覆盖 autocrlf 行为。
+#
+# 规则：仓库内与工作区一律 LF，仅 Windows 批处理保留 CRLF。
+
+* text=auto eol=lf
+
+# Windows 批处理/命令脚本必须 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell 脚本必须 LF
+gradlew text eol=lf
+*.sh text eol=lf
+
+# 二进制文件不做换行转换
+*.png binary
+*.webp binary
+*.jpg binary
+*.jar binary
+*.keystore binary
+*.jks binary
+*.apk binary
+*.aab binary
+*.so binary
