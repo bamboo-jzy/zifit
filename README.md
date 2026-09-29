@@ -53,7 +53,7 @@ cd zifit
 本项目采用 **GNU General Public License v3.0** 许可，全文见 [LICENSE](LICENSE)。
 
 ```
-Copyright (C) 2026 bamboomail_j@163.com
+Copyright (C) 2026 bamboo-jzy <bamboomail_j@163.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -65,3 +65,20 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 ```
+
+### 由此产生的项目义务
+
+GPL-3.0 是 copyleft 许可 —— 它管的是**分发**，不管你自己怎么用。本项目的落实情况：
+
+| 义务 | 条款 | 落实方式 |
+|---|---|---|
+| 分发二进制须提供完整对应源码 | §6 | 本仓库公开即为源码 |
+| 衍生版本必须沿用同一许可 | §5(c) | 由 GPL-3.0 自动继承，无需额外动作 |
+| 修改须显著标注 | §5(a) | Git 提交历史天然满足 |
+| 带交互界面的作品须展示法律声明 | §5(d) / §0 | ⚠️ **待办** —— App 内需有「关于」页，展示版权行、无担保声明与许可证获取方式 |
+| 不得引入闭源 SDK | §5(c) / §10 | 已列入上方设计约束 |
+
+两点需要说清：
+
+- **仅在自有设备上使用、不向他人分发时，上述义务不触发**；一旦把 APK 发给他人或提供下载，即全部生效。
+- **你是唯一版权人**，因此仍可自行对其他方另行授权（双许可）。GPL-3.0 约束的是收到代码的第三方，不是你本人。
