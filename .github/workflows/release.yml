@@ -60,8 +60,32 @@ jobs:
       - name: 配置 Gradle 缓存
         uses: gradle/actions/setup-gradle@v4
 
-      - name: 安装 Android SDK
-        uses: android-actions/setup-android@v3
+      - name: 改用官方 Gradle 发行源
+        run: |
+          set -euo pipefail
+          # 仓库里的 distributionUrl 指向腾讯云镜像（本机在国内快），runner 在海外反而绕远。
+          # 换域名即可：distributionSha256Sum 校验的是同一个官方包，不会因此失败。
+          sed -i 's#mirrors\.cloud\.tencent\.com/gradle#services.gradle.org/distributions#' \
+            gradle/wrapper/gradle-wrapper.properties
+          grep distributionUrl gradle/wrapper/gradle-wrapper.properties
+
+      - name: 准备 Android SDK
+        run: |
+          set -euo pipefail
+          # ubuntu-latest 镜像自带 Android SDK，直接用，不引第三方 setup action
+          # （原先的 android-actions/setup-android@v3 在本 runner 上直接安装失败）。
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          if [ ! -d "$SDK" ]; then
+            echo "✗ 没找到 Android SDK（$SDK）—— runner 镜像可能变了，需要更新这段" >&2
+            exit 1
+          fi
+          # 写进后续步骤的环境：Gradle 靠 ANDROID_HOME 定位 SDK（仓库里没有 local.properties）
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "$SDK/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
+          echo "SDK = $SDK"
+          ls "$SDK"
 
       - name: 安装 platform 36 与 build-tools 36.0.0
         run: |
@@ -69,6 +93,7 @@ jobs:
           # 先接受许可，否则 sdkmanager 会在无人值守环境下等待输入而挂住
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+          sdkmanager --list_installed | head -30
 
       - name: 拉取 RepDB 数据集
         run: bash tools/fetch_repdb.sh
