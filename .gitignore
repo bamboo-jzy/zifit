@@ -15,3 +15,21 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# 调试用密钥（AI 服务地址 / key / 模型）。本仓库是 public ——
+# 这个文件里放的是真密钥，提交即泄露，且会永久留在 Git 历史里。
+# 模板见 .env.example；构建时由 app/build.gradle.kts 读出来注入 debug 包。
+.env
+
+# release 签名密钥库与口令文件 —— 仓库 public，提交即等于把签名私钥交出去。
+# 密钥库本体刻意放在仓库之外（keystore.properties 的 storeFile 指向那里），
+# 这里再挡一道，防止以后有人把 .jks/.p12 放进仓库目录。
+keystore.properties
+*.jks
+*.keystore
+*.p12
+
+# RepDB 免费层数据集（第三方数据，非本仓库所有）。
+# 许可 Term 3 禁止「作为数据集再分发」，而本仓库为 public —— 数据只随 APK 分发，不入库。
+# 复现： bash tools/fetch_repdb.sh
+/app/src/main/assets/repdb/
