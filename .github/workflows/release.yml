@@ -104,8 +104,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${KEYSTORE_BASE64:-}" ]; then
-            echo "✗ 仓库缺少 ZIFIT_KEYSTORE_BASE64 Secret" >&2
-            exit 1
+            # 刻意**不在这里** exit 1：先让构建跑完，把"环境/依赖/数据集"这类问题
+            # 一次暴露干净；签名缺失留到「校验产物已签名」那步统一报错。
+            echo "::warning::仓库缺少 ZIFIT_KEYSTORE_BASE64 Secret —— 本次产出 unsigned 包，仅供验证构建链路"
+            exit 0
           fi
           printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/zifit-release.p12"
           ls -l "$RUNNER_TEMP/zifit-release.p12"
@@ -118,8 +120,13 @@ jobs:
           ZIFIT_KEY_PASSWORD: ${{ secrets.ZIFIT_KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          if [ ! -f "$ZIFIT_KEYSTORE_FILE" ]; then
+            # 没有密钥库就把四项一起撤掉，Gradle 才认得出"签名没配好"并产出 unsigned 包。
+            # 只撤文件路径的话其余三项仍有值，Gradle 会拿不存在的文件去建签名，构建反而炸掉。
+            unset ZIFIT_KEYSTORE_FILE ZIFIT_STORE_PASSWORD ZIFIT_KEY_ALIAS ZIFIT_KEY_PASSWORD
+          fi
           # 用 bash 调 gradlew 而不是 ./gradlew：仓库里的 gradlew 是 100644（Windows 提交
-          # 带不进来执行位），直接执行会 permission denied。见 .gitattributes 的说明。
+          # 带不进来执行位），直接执行会 permission denied。
           bash ./gradlew :app:assembleRelease \
             -PzifitVersionName="${{ steps.version.outputs.name }}" \
             -PzifitVersionCode="${{ steps.version.outputs.code }}"
