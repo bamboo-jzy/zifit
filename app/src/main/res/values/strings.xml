@@ -1,3 +1,244 @@
 <resources>
     <string name="app_name">ZiFit</string>
+
+    <!--
+      底部 dock（顺序见 TopLevelDestination：动作库 → 训练 → 饮食 → 食材库 → 我的）。
+      dock 只显示图标，以下文案仅作无障碍描述（contentDescription），不在界面渲染。
+    -->
+    <string name="tab_exercise">动作库</string>
+    <string name="tab_training">训练</string>
+    <string name="tab_diet">饮食</string>
+    <string name="tab_food">食材库</string>
+    <string name="tab_profile">我的</string>
+
+    <!--
+      全站共用的动作文案。返回键出现在动作详情与「我的」下所有二级页面，
+      故提到共用位置，不再挂在某个功能名下。
+      ⚠️ PageHeader 的返回按钮以它为无障碍描述，BottomNavigationTest 之类的测试可能按它定位。
+    -->
+    <string name="action_back">返回</string>
+
+    <!-- 动作库列表 -->
+    <string name="exercise_title">动作库</string>
+    <string name="exercise_search_hint">搜索动作 / 肌群 / 器械</string>
+    <string name="exercise_empty">没有匹配的动作</string>
+    <string name="exercise_loading">正在载入动作数据…</string>
+    <string name="exercise_filter_all">全部</string>
+    <string name="exercise_data_missing">动作数据未导入。请在项目根目录执行：bash tools/fetch_repdb.sh</string>
+
+    <!-- 动作详情 -->
+    <string name="exercise_pose_start">起始</string>
+    <string name="exercise_pose_peak">到位</string>
+    <string name="exercise_section_muscles">主练肌群</string>
+    <string name="exercise_section_synergists">协同肌群</string>
+    <string name="exercise_section_instructions">动作要领</string>
+    <string name="exercise_section_tips">要点提示</string>
+    <string name="exercise_section_goals">训练目标</string>
+    <string name="exercise_section_tags">标签</string>
+    <string name="exercise_met">代谢当量 %1$s MET</string>
+    <string name="exercise_met_unknown">代谢当量未知</string>
+    <string name="exercise_unilateral">单侧</string>
+    <string name="exercise_original_text">要领与提示暂为英文原文</string>
+    <string name="exercise_credit_short">数据与插画来自 RepDB</string>
+
+    <!-- 训练 -->
+    <string name="training_title">今日训练</string>
+    <string name="training_subtitle">训练计划尚未生成。</string>
+
+    <!-- 饮食 -->
+    <string name="diet_title">今日饮食</string>
+    <string name="diet_subtitle">饮食计划尚未生成。</string>
+
+    <!--
+      食材库。刻意**没有页面标题**（与动作库一致）：
+      dock 的无障碍描述里已经有「食材库」三个字，页面上再出现一次，
+      BottomNavigationTest 的「标签文案不得渲染为正文」就会命中两个节点。
+    -->
+    <string name="food_search_hint">搜索食材，或从营养库添加</string>
+    <string name="food_action_new">新建</string>
+    <string name="food_section_library">我的食材</string>
+    <string name="food_section_remote">营养库</string>
+    <string name="food_add">加入</string>
+    <string name="food_loading">正在读取食材库…</string>
+    <string name="food_empty">食材库还是空的。点右上角「新建」手动录入，或在上面搜索后一键加入。</string>
+    <string name="food_empty_filtered">我的食材里没有匹配「%1$s」的条目。</string>
+    <string name="food_searching">正在查询营养库…</string>
+    <string name="food_search_unavailable">营养库查询尚未接入，下个版本开放。当前请用「新建」手动录入。</string>
+    <string name="food_search_failed">营养库查询失败：%1$s</string>
+    <string name="food_search_no_hit">营养库里没有「%1$s」。</string>
+    <!-- 食材行：营养值一律以「每 100g 可食部」计，故能量那列不再重复写单位全称 -->
+    <string name="food_energy_unit">kcal</string>
+    <string name="food_row_protein">蛋白 %1$s</string>
+    <string name="food_row_fat">脂肪 %1$s</string>
+    <string name="food_row_carbohydrate">碳水 %1$s</string>
+
+    <!-- 食材编辑弹窗 -->
+    <string name="food_editor_new">新建食材</string>
+    <string name="food_editor_edit">编辑食材</string>
+    <string name="food_editor_scale">以下均为每 100g 可食部的含量，留空表示未测。</string>
+    <string name="food_editor_name">名称</string>
+    <string name="food_editor_energy">能量（kcal）</string>
+    <string name="food_editor_protein">蛋白质（g）</string>
+    <string name="food_editor_fat">脂肪（g）</string>
+    <string name="food_editor_carbohydrate">碳水化合物（g）</string>
+    <string name="food_editor_save">保存</string>
+    <string name="food_editor_cancel">取消</string>
+    <string name="food_editor_delete">删除</string>
+    <string name="food_error_name_missing">请填写食材名称</string>
+    <string name="food_error_invalid_number">「%1$s」请填不小于 0 的数字，或留空</string>
+    <!-- 数据出处：NutriData 是署名要求（见关于页），另两个用于区分录入方式 -->
+    <string name="food_origin_label">来源：%1$s</string>
+    <string name="food_origin_manual">手动录入</string>
+    <string name="food_origin_ai">AI 查询</string>
+    <string name="food_origin_nutridata">NutriData</string>
+
+    <!--
+      我的。页面**刻意没有标题**：顶部一行就是「头像 + 用户名 + 设置图标」，
+      再压一行「个人中心」是纯噪音（2026-09-30 按用户要求去掉）。
+    -->
+    <string name="profile_open_settings">设置</string>
+    <string name="profile_name_unset">未设置名称</string>
+    <string name="profile_age_years">%1$d 岁</string>
+    <string name="profile_body">身体数据</string>
+    <string name="profile_body_desc">体重、体脂、围度等随时间的记录</string>
+
+    <!-- 设置页：个人资料 / AI 接入 / 用户界面 / 关于 -->
+    <string name="settings_title">设置</string>
+    <string name="settings_profile">个人资料</string>
+    <string name="settings_profile_subtitle_unset">还没填写</string>
+    <string name="settings_about_subtitle">开源许可、数据出处与免责声明</string>
+
+    <!--
+      用户界面设置页（主题 + 显示效果）。
+      副标题沿用设置页既有约定：**当场显示当前值**（这里拼成「彩色 · 主题色蓝 · 毛玻璃开」）。
+      那里的「开 / 关」单独成键，是为了与开关状态共用同一份文案。
+    -->
+    <string name="settings_ui">用户界面</string>
+    <string name="settings_ui_subtitle">%1$s · 主题色%2$s · 毛玻璃%3$s</string>
+    <string name="ui_state_on">开</string>
+    <string name="ui_state_off">关</string>
+    <string name="ui_state_unsupported">不可用</string>
+
+    <!--
+      主题：模式 + 主题色
+      主题模式是 **2×2**：{彩色, 中性} × {浅, 深}。「彩色」指光斑有没有色相，
+      不是底色深浅 —— 所以四档按「浅组一行、深组一行」的顺序排，读起来才顺。
+    -->
+    <string name="ui_theme_mode">主题模式</string>
+    <string name="ui_theme_mode_desc">带「彩色」的两档有彩色光斑，另两档是中性灰；浅深按昼夜挑。</string>
+    <string name="theme_mode_colorful_light">彩色·浅</string>
+    <string name="theme_mode_light">浅色</string>
+    <string name="theme_mode_colorful_dark">彩色·深</string>
+    <string name="theme_mode_dark">深色</string>
+    <string name="ui_theme_color">主题色</string>
+    <string name="ui_theme_color_desc">高亮处的颜色：底部栏、筛选、热量数字与新建。</string>
+    <string name="theme_accent_blue">蓝</string>
+    <string name="theme_accent_mint">薄荷</string>
+    <string name="theme_accent_violet">紫</string>
+    <string name="theme_accent_coral">陶土</string>
+    <string name="theme_accent_rose">玫红</string>
+
+    <!-- 显示效果 -->
+    <string name="ui_blur">毛玻璃模糊</string>
+    <string name="ui_blur_desc">底部栏实时虚化它背后的画面。关掉改用实底，省一点电。</string>
+    <string name="ui_blur_unsupported">当前系统版本没有实时模糊能力（需要 Android 12 及以上），这项设置对它无效。</string>
+
+    <!-- 个人资料设置页 -->
+    <string name="profile_edit_title">个人资料</string>
+    <string name="profile_avatar_hint">图片会复制到应用私有目录，不会上传到任何服务器。</string>
+    <string name="profile_field_name">名称</string>
+    <!--
+      ⚠️ 生日**没有**日期格式示例了：它改成了日历选择器（GlassPickerField），
+      不再由键盘输入，也就不存在「格式写错」这条路径。
+      原先为此加的两处 `tools:ignore="TypographyDashes"` 随之取消，
+      所以 `<resources>` 上的 `xmlns:tools` 也一并去掉了。
+    -->
+    <string name="profile_field_birthday">生日</string>
+    <string name="profile_birthday_unset">未设置</string>
+    <string name="profile_field_age">年龄</string>
+    <string name="profile_field_goal">训练目标</string>
+    <string name="profile_goal_hint">不选也行，AI 建议时会按「保持」处理。</string>
+    <string name="profile_age_derived">按生日推算：%1$d 岁</string>
+    <string name="profile_save">保存</string>
+    <!-- 生日由选择器给出，理论上写不进非法值；这条只在数据层被绕过时兜底（纯函数层仍保留该分支） -->
+    <string name="profile_error_birthday">生日日期无效，请重新选择</string>
+    <string name="profile_error_age_number">年龄请填整数，或留空</string>
+    <string name="profile_error_age_range">年龄请填 0–120 之间的整数</string>
+
+    <!--
+      选择器对话框（当前只有生日用到）的按钮文案。
+      按键名而不按功能命名：日期、单位、类别将来都可能是同一个对话框形态。
+    -->
+    <string name="picker_confirm">确定</string>
+    <string name="picker_cancel">取消</string>
+    <string name="picker_clear">清除</string>
+    <string name="profile_goal_muscle_gain">增肌</string>
+    <string name="profile_goal_fat_loss">减脂</string>
+    <string name="profile_goal_maintain">保持</string>
+    <string name="profile_goal_strength">增力</string>
+    <string name="profile_goal_health">健康</string>
+
+    <!--
+      AI 接入。配置项是「服务地址 + API Key + 模型」——OpenAI 兼容接口的全部必要信息。
+      密钥明文存在应用私有目录，界面上只显示掩码；页面里如实说明这一点。
+    -->
+    <string name="profile_ai">AI 接入</string>
+    <string name="profile_ai_desc">用于生成训练与饮食计划、查询营养库。填 OpenAI 兼容接口的服务地址、密钥与模型。</string>
+    <string name="profile_ai_status_on">已配置</string>
+    <string name="profile_ai_status_off">未配置</string>
+    <string name="profile_ai_missing">缺少：%1$s</string>
+    <string name="profile_ai_line_service">服务地址：%1$s</string>
+    <string name="profile_ai_line_model">模型：%1$s</string>
+    <string name="profile_ai_line_key">密钥：%1$s</string>
+    <!--
+      来源行：`.env` 注入的调试配置和用户手填的长得一模一样，不标出来分不清。
+      ENV 那一档说的「仓库根 .env」是**构建机**上的路径，不是手机上的 —— 手机上没有这个文件。
+    -->
+    <string name="profile_ai_line_source">来源：%1$s</string>
+    <string name="profile_ai_source_saved">本机保存</string>
+    <string name="profile_ai_source_env">仓库根 .env（构建时注入）</string>
+    <string name="profile_ai_source_none">未设置</string>
+    <string name="profile_ai_privacy">密钥以明文保存在本机应用私有目录，只发给你填的服务地址，不会上传到别处。</string>
+    <string name="profile_ai_privacy_env">当前密钥是构建时从仓库根 .env 注入进 APK 的（仅 debug 包），因此不要把这个安装包转发给别人。</string>
+
+    <!-- AI 接入设置页 -->
+    <string name="ai_editor_title">AI 接入配置</string>
+    <string name="ai_editor_hint">三项都填才能用。服务地址要带 http:// 或 https:// 前缀。</string>
+    <string name="ai_editor_presets">常用服务</string>
+    <string name="ai_editor_base_url">服务地址（Base URL）</string>
+    <string name="ai_editor_model">模型</string>
+    <string name="ai_editor_api_key">API Key</string>
+    <string name="ai_editor_test">测试连接</string>
+    <string name="ai_editor_testing">正在测试连接…</string>
+    <string name="ai_editor_load_env">载入 .env</string>
+    <string name="ai_test_ok">连接正常（HTTP %1$d），地址与密钥可用。</string>
+    <string name="ai_test_unauthorized">鉴权失败（HTTP %1$d）：密钥无效或没有权限。</string>
+    <string name="ai_test_no_models">服务可达，但没有 /models 接口（HTTP 404）。这不代表密钥有问题，保存后仍可使用。</string>
+    <string name="ai_test_http_error">服务返回 HTTP %1$d。</string>
+    <!--
+      连不上的五种病因分开说。刻意**不**把 Java 异常原文直接甩给用户：
+      真机上 `example.invalid` 报的是 `Unable to resolve host "example.invalid":
+      No address associated with hostname` —— 用户看不懂，也不知道该改哪一栏。
+      只有归不到类的那一档才把原始信息带出来（至少能拿去搜）。
+    -->
+    <string name="ai_test_err_dns">域名解析失败：服务地址里的主机名找不到。检查地址是否写错，或换个网络再试。</string>
+    <string name="ai_test_err_timeout">连接超时：网络能通，但 10 秒内没收到响应。检查地址后重试。</string>
+    <string name="ai_test_err_refused">目标拒绝连接：地址或端口不对，或服务没有启动。</string>
+    <string name="ai_test_err_tls">HTTPS 证书校验失败：可能是自签证书或中间代理。可换地址或改用 http://。</string>
+    <string name="ai_test_network_error">连不上：%1$s</string>
+    <string name="ai_editor_clear">清除配置</string>
+    <string name="ai_editor_save">保存</string>
+    <string name="ai_error_missing_field">请填写%1$s</string>
+    <string name="ai_error_url_not_http">服务地址要以 http:// 或 https:// 开头</string>
+
+    <!-- 关于：GPL-3.0 §5(d) 要求界面展示的法律声明 + RepDB 许可 Term 2 要求的署名 -->
+    <string name="profile_about">关于</string>
+    <string name="about_tagline">AI 驱动的个人健身教练</string>
+    <string name="about_version">版本 %1$s</string>
+    <string name="profile_about_copyright">Copyright (C) 2026 bamboo-jzy</string>
+    <string name="profile_about_license">本程序为自由软件，按 GNU 通用公共许可证 v3.0 或更新版本发布，附绝对无担保声明。\n许可全文：https://www.gnu.org/licenses/gpl-3.0.txt</string>
+    <string name="profile_about_source">源码：https://github.com/bamboo-jzy/zifit</string>
+    <string name="profile_about_exercises">动作数据与插画：Exercise data by RepDB (repdb.co)\n免费层许可 v1.0，仅限应用内使用。\nhttps://repdb.co</string>
+    <string name="profile_about_food">食材搜索来源：NutriData（nutridata.cn），营养数据参考《中国食物成分表》。\n营养值为参考值，可能与实测存在偏差，请自行核对。</string>
+    <string name="profile_about_health">训练与饮食内容仅供参考，不构成医疗建议。开始任何训练计划前请咨询医生，训练风险自负。</string>
 </resources>
