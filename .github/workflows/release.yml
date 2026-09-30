@@ -1,0 +1,128 @@
+# 发布 release APK 到 GitHub Release。
+#
+# 触发：推送 `v*` 形式的 tag（如 `v1.0`）。tag 名即版本号，`versionName` / `versionCode`
+# 由 tag 反推后通过 -P 传给 Gradle（见 app/build.gradle.kts 的 defaultConfig）。
+#
+# 三件必须在这个 workflow 里做完、不能想当然的事：
+# 1. **拉 RepDB 数据集**。`app/src/main/assets/repdb/` 被 .gitignore 忽略（RepDB 许可
+#    Term 3 禁止把数据集放进 public 仓库），checkout 出来是空的 —— 不拉就会产出一个
+#    「动作库 0 条」的废包。见 tools/fetch_repdb.sh。
+# 2. **解码签名密钥库**。密钥库住在 Secrets 里（base64），仓库里没有它。
+#    解到 $RUNNER_TEMP 下，用完随 runner 一起销毁，不进工作目录。
+# 3. **校验产物确实被签过名**。签名配置缺失时 Gradle 会安静地产出
+#    `app-release-unsigned.apk` —— 那种包能上传但装不上。这里显式挡一道。
+#
+# ⚠️ release 包**不含任何 AI 密钥**（app/build.gradle.kts 里 AI_ENV_* 恒为空串）。
+#    本仓库是 public，Release 附件全世界可下载，密钥一旦进包即泄露（硬约束 C13）。
+
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # 创建 Release 需要写权限
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+
+      - name: 从 tag 推导版本号
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION_NAME="${GITHUB_REF_NAME#v}"
+          if ! [[ "$VERSION_NAME" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "✗ tag 版本号格式不符：$GITHUB_REF_NAME（期望 v1.0 或 v1.2.3）" >&2
+            exit 1
+          fi
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_NAME"
+          PATCH="${PATCH:-0}"
+          # versionCode 用 10000 制：major*10000 + minor*100 + patch，保证单调递增且可从 tag 复现
+          VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH ))
+          echo "name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "→ versionName=$VERSION_NAME versionCode=$VERSION_CODE"
+
+      - name: 安装 JDK（21 = 构建 JVM，17 = Kotlin toolchain）
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 安装 Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 安装 platform 36 与 build-tools 36.0.0
+        run: |
+          set -euo pipefail
+          # 先接受许可，否则 sdkmanager 会在无人值守环境下等待输入而挂住
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+
+      - name: 拉取 RepDB 数据集
+        run: bash tools/fetch_repdb.sh
+
+      - name: 解码签名密钥库
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ZIFIT_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${KEYSTORE_BASE64:-}" ]; then
+            echo "✗ 仓库缺少 ZIFIT_KEYSTORE_BASE64 Secret" >&2
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/zifit-release.p12"
+          ls -l "$RUNNER_TEMP/zifit-release.p12"
+
+      - name: 构建 release APK
+        env:
+          ZIFIT_KEYSTORE_FILE: ${{ runner.temp }}/zifit-release.p12
+          ZIFIT_STORE_PASSWORD: ${{ secrets.ZIFIT_STORE_PASSWORD }}
+          ZIFIT_KEY_ALIAS: ${{ secrets.ZIFIT_KEY_ALIAS }}
+          ZIFIT_KEY_PASSWORD: ${{ secrets.ZIFIT_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          # 用 bash 调 gradlew 而不是 ./gradlew：仓库里的 gradlew 是 100644（Windows 提交
+          # 带不进来执行位），直接执行会 permission denied。见 .gitattributes 的说明。
+          bash ./gradlew :app:assembleRelease \
+            -PzifitVersionName="${{ steps.version.outputs.name }}" \
+            -PzifitVersionCode="${{ steps.version.outputs.code }}"
+
+      - name: 校验产物已签名并改名
+        id: apk
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/release/app-release.apk"
+          if [ ! -f "$APK" ]; then
+            echo "✗ 没有 app-release.apk —— 多半是签名四项没配齐，产物退回了 unsigned 包" >&2
+            ls -l app/build/outputs/apk/release/ || true
+            exit 1
+          fi
+          APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          "$APKSIGNER" verify --print-certs "$APK"
+          OUT="ZiFit-${{ steps.version.outputs.name }}.apk"
+          cp "$APK" "$OUT"
+          sha256sum "$OUT" | tee "$OUT.sha256"
+          echo "file=$OUT" >> "$GITHUB_OUTPUT"
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ZiFit ${{ steps.version.outputs.name }}
+          files: |
+            ${{ steps.apk.outputs.file }}
+            ${{ steps.apk.outputs.file }}.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: false
